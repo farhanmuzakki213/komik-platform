@@ -1,0 +1,31 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "@tailwindcss/forms": "^0.5.2",
+        "@tailwindcss/vite": "^4.1.18",
+        "axios": "^1.6.4",
+        "laravel-vite-plugin": "^1.0",
+        "tailwindcss": "^4.1.18",
+        "vite": "^5.0"
+    },
+    "dependencies": {
+        "@floating-ui/dom": "^1.7.5",
+        "@fullcalendar/core": "^6.1.20",
+        "@fullcalendar/daygrid": "^6.1.20",
+        "@fullcalendar/interaction": "^6.1.20",
+        "@fullcalendar/list": "^6.1.20",
+        "@fullcalendar/timegrid": "^6.1.20",
+        "@popperjs/core": "^2.11.8",
+        "alpinejs": "^3.15.8",
+        "apexcharts": "^5.3.6",
+        "flatpickr": "^4.6.13",
+        "jsvectormap": "^1.7.0",
+        "prismjs": "^1.30.0",
+        "swiper": "^12.1.0"
+    }
+}
