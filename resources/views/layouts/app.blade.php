@@ -31,10 +31,8 @@
                     const body = document.body;
                     if (this.theme === 'dark') {
                         html.classList.add('dark');
-                        body.classList.add('dark', 'bg-gray-900');
                     } else {
                         html.classList.remove('dark');
-                        body.classList.remove('dark', 'bg-gray-900');
                     }
                 }
             });
@@ -80,13 +78,12 @@
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             if (savedTheme === 'dark' || (!savedTheme && systemTheme === 'dark')) {
                 document.documentElement.classList.add('dark');
-                document.body.classList.add('dark', 'bg-gray-900');
             }
         })();
     </script>
 </head>
 
-<body x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 500)" class="transition-colors duration-300">
+<body x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 500)" class="dark:bg-gray-900 transition-colors duration-300">
 
     <div x-show="!loaded" class="fixed inset-0 z-[999999] flex items-center justify-center bg-white dark:bg-gray-900">
         <x-common.preloader />
