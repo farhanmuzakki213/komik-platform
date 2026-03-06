@@ -4,39 +4,75 @@ namespace App\Helpers;
 
 class MenuHelper
 {
+    private static function filterItems($items)
+    {
+        $user = auth()->user();
+        if (!$user) return [];
+
+        $filtered = array_filter($items, function ($item) use ($user) {
+            if (!isset($item['role'])) {
+                return true;
+            }
+
+            if (is_array($item['role'])) {
+                return $user->hasAnyRole($item['role']);
+            }
+            return $user->hasRole($item['role']);
+        });
+        return array_values($filtered);
+    }
+
     public static function getMainNavItems()
     {
-        return [
+        $items = [
             [
                 'icon' => 'dashboard',
                 'name' => 'Dashboard',
-                'path' => route('dashboard', [], false),
+                'path' => route('admin.dashboard', [], false),
+                'role' => 'admin',
             ],
             [
-                'icon' => 'forms', // Anda bisa ganti dengan icon 'table' jika ada
+                'icon' => 'forms',
                 'name' => 'Manajemen Komik',
+                'role' => 'admin',
                 'subItems' => [
-                    // FAKTA: Kita arahkan ke route 'comics.index'
-                    ['name' => 'Daftar Komik', 'path' => route('comics.index', [], false), 'pro' => false],
+                    ['name' => 'Review Komik', 'path' => route('admin.management', [], false), 'pro' => false],
+                ],
+            ],
+
+            [
+                'icon' => 'dashboard',
+                'name' => 'Dashboard',
+                'path' => route('author.dashboard', [], false),
+                'role' => 'penulis',
+            ],
+            [
+                'icon' => 'forms',
+                'name' => 'Manajemen Komik',
+                'role' => 'penulis',
+                'subItems' => [
+                    ['name' => 'Karya Saya', 'path' => route('comics.index', [], false), 'pro' => false],
                 ],
             ],
         ];
+        return self::filterItems($items);
     }
 
     public static function getOthersItems()
     {
-        return [
+        $items = [
             [
                 'icon' => 'user-profile',
                 'name' => 'Pengaturan Profil',
                 'path' => route('profile', [], false),
             ],
         ];
+        return self::filterItems($items);
     }
 
     public static function getMenuGroups()
     {
-        return [
+        $groups = [
             [
                 'title' => 'Creator Menu',
                 'items' => self::getMainNavItems()
@@ -46,6 +82,11 @@ class MenuHelper
                 'items' => self::getOthersItems()
             ]
         ];
+        $filteredGroups = array_filter($groups, function($group) {
+            return count($group['items']) > 0;
+        });
+
+        return array_values($filteredGroups);
     }
 
     public static function isActive($path)

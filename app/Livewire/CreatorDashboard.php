@@ -10,6 +10,6 @@ class CreatorDashboard extends Component
     #[Layout('layouts.app')]
     public function render()
     {
-        return view('livewire.creator-dashboard');
+        return view('livewire.pages.author.creator-dashboard');
     }
 }

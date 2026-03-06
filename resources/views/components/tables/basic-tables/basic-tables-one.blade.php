@@ -3,16 +3,16 @@
         {
             id: 1,
             user: {
-                image: './images/user/user-17.jpg',
+                image: '{{ asset('images/user/user-17.jpg') }}',
                 name: 'Lindsey Curtis',
                 role: 'Web Designer',
             },
             projectName: 'Agency Website',
             team: {
                 images: [
-                    './images/user/user-22.jpg',
-                    './images/user/user-23.jpg',
-                    './images/user/user-24.jpg',
+                    '{{ asset('images/user/user-22.jpg') }}',
+                    '{{ asset('images/user/user-23.jpg') }}',
+                    '{{ asset('images/user/user-24.jpg') }}',
                 ],
             },
             budget: '3.9K',
@@ -21,15 +21,15 @@
         {
             id: 2,
             user: {
-                image: './images/user/user-18.jpg',
+                image: '{{ asset('images/user/user-18.jpg') }}',
                 name: 'Kaiya George',
                 role: 'Project Manager',
             },
             projectName: 'Technology',
             team: {
                 images: [
-                    './images/user/user-25.jpg',
-                    './images/user/user-26.jpg',
+                    '{{ asset('images/user/user-25.jpg') }}',
+                    '{{ asset('images/user/user-26.jpg') }}',
                 ],
             },
             budget: '24.9K',
@@ -38,14 +38,14 @@
         {
             id: 3,
             user: {
-                image: './images/user/user-19.jpg',
+                image: '{{ asset('images/user/user-19.jpg') }}',
                 name: 'Zain Geidt',
                 role: 'Content Writer',
             },
             projectName: 'Blog Writing',
             team: {
                 images: [
-                    './images/user/user-27.jpg',
+                    '{{ asset('images/user/user-27.jpg') }}',
                 ],
             },
             budget: '12.7K',
@@ -54,16 +54,16 @@
         {
             id: 4,
             user: {
-                image: './images/user/user-20.jpg',
+                image: '{{ asset('images/user/user-20.jpg') }}',
                 name: 'Abram Schleifer',
                 role: 'Digital Marketer',
             },
             projectName: 'Social Media',
             team: {
                 images: [
-                    './images/user/user-28.jpg',
-                    './images/user/user-29.jpg',
-                    './images/user/user-30.jpg',
+                    '{{ asset('images/user/user-28.jpg') }}',
+                    '{{ asset('images/user/user-29.jpg') }}',
+                    '{{ asset('images/user/user-30.jpg') }}',
                 ],
             },
             budget: '2.8K',
@@ -72,16 +72,16 @@
         {
             id: 5,
             user: {
-                image: './images/user/user-21.jpg',
+                image: '{{ asset('images/user/user-21.jpg') }}',
                 name: 'Carla George',
                 role: 'Front-end Developer',
             },
             projectName: 'Website',
             team: {
                 images: [
-                    './images/user/user-31.jpg',
-                    './images/user/user-32.jpg',
-                    './images/user/user-33.jpg',
+                    '{{ asset('images/user/user-31.jpg') }}',
+                    '{{ asset('images/user/user-32.jpg') }}',
+                    '{{ asset('images/user/user-33.jpg') }}',
                 ],
             },
             budget: '4.5K',

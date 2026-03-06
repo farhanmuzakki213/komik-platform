@@ -36,6 +36,8 @@ new #[Layout('layouts.guest')] class extends Component {
             'password' => Hash::make($this->password),
         ]);
 
+        $user->assignRole('penulis');
+
         event(new Registered($user));
 
         Auth::login($user);
