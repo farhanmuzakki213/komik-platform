@@ -28,14 +28,14 @@ new #[Layout('layouts.guest')] class extends Component {
         <!-- Form -->
         <div class="flex w-full flex-1 flex-col lg:w-1/2">
             <div class="mx-auto w-full max-w-md pt-10">
-                <a href="/"
+                <a wire:navigate href="{{route('home')}}"
                     class="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                     <svg class="stroke-current" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                         viewBox="0 0 20 20" fill="none">
                         <path d="M12.7083 5L7.5 10.2083L12.7083 15.4167" stroke="" stroke-width="1.5"
                             stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    Back to dashboard
+                    Back to home
                 </a>
             </div>
             <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
@@ -49,7 +49,7 @@ new #[Layout('layouts.guest')] class extends Component {
                         </p>
                     </div>
                     <div>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
+                        {{-- <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
                             <button
                                 class="inline-flex items-center justify-center gap-3 rounded-lg bg-gray-100 px-7 py-3 text-sm font-normal text-gray-700 transition-colors hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
@@ -87,7 +87,7 @@ new #[Layout('layouts.guest')] class extends Component {
                             <div class="relative flex justify-center text-sm">
                                 <span class="bg-white p-2 text-gray-400 sm:px-5 sm:py-2 dark:bg-gray-900">Or</span>
                             </div>
-                        </div>
+                        </div> --}}
                         <form wire:submit="login">
                             <div class="space-y-5">
                                 <!-- Email -->
@@ -189,7 +189,7 @@ new #[Layout('layouts.guest')] class extends Component {
                 <!-- ===== Common Grid Shape Start ===== -->
                 <x-common.common-grid-shape />
                 <div class="flex max-w-xs flex-col items-center">
-                    <a href="/" class="mb-4 block">
+                    <a wire:navigate href="{{route('home')}} class="mb-4 block">
                         <img src="./images/logo/auth-logo.svg" alt="Logo" />
                     </a>
                     <p class="text-center text-gray-400 dark:text-white/60">

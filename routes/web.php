@@ -4,7 +4,7 @@ use App\Livewire\CreatorDashboard;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\ComicManager;
 
-Route::view('/', 'welcome');
+Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // FAKTA: Arahkan langsung ke Livewire Class

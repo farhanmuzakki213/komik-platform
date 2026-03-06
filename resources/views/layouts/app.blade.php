@@ -73,13 +73,15 @@
     </script>
 
     <script>
-        (function() {
+        const applyTheme = () => {
             const savedTheme = localStorage.getItem('theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             if (savedTheme === 'dark' || (!savedTheme && systemTheme === 'dark')) {
                 document.documentElement.classList.add('dark');
             }
-        })();
+        };
+        applyTheme();
+        document.addEventListener('livewire:navigated', applyTheme);
     </script>
 </head>
 

@@ -72,7 +72,7 @@
 
     <!-- Apply dark mode immediately to prevent flash -->
     <script>
-        (function() {
+        const applyTheme = () => {
             const savedTheme = localStorage.getItem('theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const theme = savedTheme || systemTheme;
@@ -81,11 +81,13 @@
             } else {
                 document.documentElement.classList.remove('dark');
             }
-        })();
+        };
+        applyTheme();
+        document.addEventListener('livewire:navigated', applyTheme);
     </script>
 </head>
 
-<body x-data="{ 'loaded': true }" class="dark:bg-gray-900 transition-colors duration-300" x-init="$store.sidebar.isExpanded = window.innerWidth >= 1280;
+<body class="dark:bg-gray-900 transition-colors duration-300" x-init="$store.sidebar.isExpanded = window.innerWidth >= 1280;
 const checkMobile = () => {
     if (window.innerWidth < 1280) {
         $store.sidebar.setMobileOpen(false);
@@ -96,10 +98,6 @@ const checkMobile = () => {
     }
 };
 window.addEventListener('resize', checkMobile);">
-
-    {{-- preloader --}}
-    <x-common.preloader />
-    {{-- preloader end --}}
 
     {{ $slot }}
 
