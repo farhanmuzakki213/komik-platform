@@ -111,9 +111,7 @@
                             fill="currentColor" />
                     </svg>
                 </button>
-
-                <!-- Notification Dropdown -->
-                <x-header.notification-dropdown />
+                <livewire:components.notification-bell />
             </div>
 
             <!-- User Dropdown -->

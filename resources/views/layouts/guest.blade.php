@@ -72,7 +72,7 @@
 
     <!-- Apply dark mode immediately to prevent flash -->
     <script>
-        const applyTheme = () => {
+        var applyTheme = function() {
             const savedTheme = localStorage.getItem('theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const theme = savedTheme || systemTheme;

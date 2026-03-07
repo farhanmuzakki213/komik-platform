@@ -73,7 +73,7 @@
     </script>
 
     <script>
-        const applyTheme = () => {
+        var applyTheme = function() {
             const savedTheme = localStorage.getItem('theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             if (savedTheme === 'dark' || (!savedTheme && systemTheme === 'dark')) {
@@ -114,7 +114,7 @@
             </div>
         </div>
     </div>
-
+    <x-common.delete-modal />
     @stack('scripts')
 </body>
 </html>

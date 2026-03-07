@@ -18,9 +18,11 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('synopsis');
-            $table->string('cover_image');
+            $table->string('square_thumbnail')->nullable();
+            $table->string('vertical_thumbnail');
             $table->string('banner_image')->nullable();
             $table->enum('status', ['draft', 'pending_review', 'approved', 'rejected'])->default('draft');
+            $table->boolean('is_adult')->default(false);
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
             $table->index(['status', 'published_at']);
@@ -31,6 +33,8 @@ return new class extends Migration
             $table->foreignId('comic_id')->constrained('comics')->cascadeOnDelete();
             $table->float('chapter_number');
             $table->string('title');
+            $table->text('creator_note')->nullable();
+            $table->boolean('allow_comments')->default(true);
             $table->string('thumbnail')->nullable();
             $table->enum('status', ['draft', 'pending_review', 'approved', 'rejected'])->default('draft');
             $table->text('admin_notes')->nullable();
