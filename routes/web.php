@@ -8,10 +8,16 @@ use App\Livewire\ComicManager;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::view('/', 'welcome')->name('home');
+/* HEADER MENU */
+Volt::route('/', 'frontend.home')->name('home');
+Volt::route('/originals', 'frontend.originals')->name('originals');
+Volt::route('/categories', 'frontend.categories')->name('categories');
+Volt::route('/rankings', 'frontend.rankings')->name('rankings');
+
+Volt::route('/comic/{comic}', 'frontend.comics.show')->name('comics.show');
+Volt::route('/comic/{comic}/episode/{chapter}', 'frontend.comics.read')->name('comics.read');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // FAKTA: Arahkan langsung ke Livewire Class
     Route::get('/dashboard', function() {
         if (auth()->user()->hasRole('admin')) {
             return redirect()->route('admin.dashboard');

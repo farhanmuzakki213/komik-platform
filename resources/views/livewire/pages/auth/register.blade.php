@@ -230,12 +230,14 @@ new #[Layout('layouts.guest')] class extends Component {
             <div class="z-1 flex items-center justify-center">
                 <!-- ===== Common Grid Shape Start ===== -->
                 <x-common.common-grid-shape />
-                <div class="flex max-w-xs flex-col items-center">
-                    <a wire:navigate href="{{ route('home') }}" class="mb-4 block">
-                        <img src="./images/logo/auth-logo.svg" alt="Logo" />
+                <div class="flex max-w-md flex-col items-center px-8">
+                    <a wire:navigate href="{{ route('home') }}" class="mb-6 block">
+                        <span class="text-4xl sm:text-5xl font-black text-brand-500 tracking-tighter uppercase font-sans drop-shadow-lg">WEBKOMIK</span>
                     </a>
-                    <p class="text-center text-gray-400 dark:text-white/60">
-                        Free and Open-Source Tailwind CSS Admin Dashboard Template
+                    
+                    <p class="text-center text-gray-300 dark:text-white/80 font-medium text-lg leading-relaxed">
+                        Platform komik digital terbaik. <br>
+                        <span class="text-white font-bold">Baca, buat, dan bagikan</span> karyamu ke seluruh dunia.
                     </p>
                 </div>
             </div>
