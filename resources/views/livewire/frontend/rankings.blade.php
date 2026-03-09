@@ -20,15 +20,15 @@ new #[Layout('layouts.frontend')] class extends Component {
             'comics' => $comics,
         ];
     }
-    
+
     public function setTab($tab) { $this->activeTab = $tab; }
 }; ?>
 
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    
+
     <div class="flex space-x-8 md:space-x-12 border-b border-gray-200 mb-10 overflow-x-auto custom-scrollbar">
         @foreach(['TRENDING', 'POPULAR', 'ORIGINALS', 'CANVAS'] as $tab)
-            <button wire:click="setTab('{{ $tab }}')" 
+            <button wire:click="setTab('{{ $tab }}')"
                 class="pb-3 text-[15px] font-bold uppercase tracking-wide transition-colors whitespace-nowrap relative {{ $activeTab === $tab ? 'text-black' : 'text-gray-400 hover:text-black' }}">
                 {{ $tab }}
                 @if($activeTab === $tab)
@@ -40,18 +40,18 @@ new #[Layout('layouts.frontend')] class extends Component {
 
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-12">
         @forelse($comics as $index => $comic)
-            <a href="#" class="group block relative">
-                
+            <a href="{{ route('comics.show', $comic->id) }}" class="group block relative">
+
                 <div class="relative w-full aspect-[3/4] rounded-lg overflow-visible mb-3 bg-gray-100 border border-gray-100">
                     <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}" alt="{{ $comic->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg">
-                    
+
                     @if($index == 4 || $index == 18 || $index == 24) <div class="absolute top-1.5 left-1.5 bg-[#00dc64] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[3px] uppercase tracking-wide">New Series</div>
                     @endif
 
-                    <div class="absolute -bottom-7 -left-1 text-[85px] font-black italic tracking-tighter text-white z-10 flex items-end" 
+                    <div class="absolute -bottom-7 -left-1 text-[85px] font-black italic tracking-tighter text-white z-10 flex items-end"
                          style="-webkit-text-stroke: 3px black; text-shadow: 0px 4px 4px rgba(0,0,0,0.25); line-height: 0.8;">
                         {{ $index + 1 }}
-                        
+
                         <div class="flex items-center text-[#00dc64] font-sans italic-none text-[11px] font-bold mb-3 ml-1" style="-webkit-text-stroke: 0px;">
                             <svg class="w-2.5 h-2.5 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
                             {{ rand(1, 20) }}

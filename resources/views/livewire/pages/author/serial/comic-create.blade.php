@@ -90,7 +90,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
 
                     <div>
-                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Banner Background</label>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Banner Background (Optional)</label>
                         <input wire:model="banner_image" type="file" accept="image/*" class="w-full cursor-pointer rounded-lg border border-gray-300 bg-transparent text-sm file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2.5 dark:border-gray-700 dark:file:bg-gray-800 dark:text-gray-400" />
                     </div>
                 </div>

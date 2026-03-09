@@ -20,13 +20,13 @@ new #[Layout('layouts.frontend')] class extends Component {
             'indieComics'    => (clone $baseQuery)->latest()->take(6)->get(),
         ];
     }
-    
+
     public function setDay($day) { $this->activeDay = $day; }
     public function setCategory($cat) { $this->activeCategory = $cat; }
 }; ?>
 
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
-    
+
     <section>
         <div class="flex justify-between items-end mb-4">
             <div class="flex items-center space-x-4">
@@ -36,7 +36,7 @@ new #[Layout('layouts.frontend')] class extends Component {
                     <button class="text-[11px] font-bold px-4 py-1.5 text-gray-500 hover:text-black rounded-full">Popular</button>
                 </div>
             </div>
-            <a href="#" class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+            <a href="{{ route('rankings')}}" class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
         </div>
 
         <div class="grid grid-cols-5 gap-4">
@@ -44,7 +44,7 @@ new #[Layout('layouts.frontend')] class extends Component {
                 <a href="{{ route('comics.show', $comic->id) }}" class="group relative block">
                     <div class="relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
                         <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute -bottom-6 -left-2 text-[100px] font-black italic tracking-tighter text-white" 
+                        <div class="absolute -bottom-6 -left-2 text-[100px] font-black italic tracking-tighter text-white"
                              style="-webkit-text-stroke: 3px black; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1;">
                             {{ $index + 1 }}
                         </div>
@@ -75,12 +75,12 @@ new #[Layout('layouts.frontend')] class extends Component {
     <section>
         <div class="flex justify-between items-end mb-4">
             <h2 class="text-xl font-bold text-black">Popular Series by Category</h2>
-            <a href="#" class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+            <a href="{{ route('categories')}}" class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
         </div>
-        
+
         <div class="flex space-x-2 mb-4 overflow-x-auto custom-scrollbar pb-2">
             @foreach(['Drama', 'Fantasy', 'Comedy', 'Action', 'Slice of life', 'Romance', 'Superhero', 'Sci-fi'] as $cat)
-                <button wire:click="setCategory('{{ $cat }}')" 
+                <button wire:click="setCategory('{{ $cat }}')"
                     class="px-4 py-1.5 text-[12px] font-bold rounded-full border transition-colors whitespace-nowrap {{ $activeCategory === $cat ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400' }}">
                     {{ $cat }}
                 </button>
@@ -89,7 +89,7 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         <div class="grid grid-cols-6 gap-4">
             @foreach($categoryComics as $comic)
-                <a href="#" class="group block">
+                <a href="{{ route('comics.show', $comic->id) }}" class="group block">
                     <div class="relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 mb-2">
                         <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     </div>
@@ -104,7 +104,7 @@ new #[Layout('layouts.frontend')] class extends Component {
         <h2 class="text-xl font-bold text-black mb-4">Newly Released Originals</h2>
         <div class="grid grid-cols-5 gap-4">
             @foreach($newReleases as $comic)
-                <a href="#" class="group block relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
+                <a href="{{ route('originals') }}" class="group block relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
                     <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80"></div>
                     <h3 class="absolute bottom-4 left-4 right-4 text-white font-black text-lg leading-tight text-center drop-shadow-lg">{{ $comic->title }}</h3>
@@ -116,12 +116,12 @@ new #[Layout('layouts.frontend')] class extends Component {
     <section>
         <div class="flex justify-between items-end mb-4">
             <h2 class="text-xl font-bold text-black">Daily</h2>
-            <a href="#" class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+            <a href="{{ route('comics.show', $comic->id) }}" class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
         </div>
 
         <div class="flex border-b border-gray-200 mb-4 overflow-x-auto custom-scrollbar">
             @foreach(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Completed'] as $day)
-                <button wire:click="setDay('{{ strtoupper($day) }}')" 
+                <button wire:click="setDay('{{ strtoupper($day) }}')"
                     class="px-5 py-3 text-[14px] font-bold transition-colors whitespace-nowrap {{ $activeDay === strtoupper($day) ? 'text-white bg-black rounded-t-lg' : 'text-gray-500 hover:text-black' }}">
                     {{ $day }}
                 </button>
@@ -139,7 +139,7 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         <div class="grid grid-cols-6 gap-x-4 gap-y-8">
             @foreach($dailyComics as $comic)
-                <a href="#" class="group block">
+                <a href="{{ route('comics.show', $comic->id) }}" class="group block">
                     <div class="relative aspect-[3/4] rounded-lg overflow-hidden mb-2 bg-gray-100">
                         <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <div class="absolute top-1.5 left-1.5 bg-[#00dc64] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wide">

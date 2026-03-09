@@ -29,13 +29,13 @@ new #[Layout('layouts.frontend')] class extends Component {
             'totalSeries' => $comics->count(),
         ];
     }
-    
+
     public function setCategory($cat) { $this->activeCategory = strtoupper($cat); }
     public function setSort($sort) { $this->sortBy = $sort; }
 }; ?>
 
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    
+
     <div class="flex space-x-8 border-b border-gray-200 mb-8 overflow-x-auto custom-scrollbar">
         @php
             $displayGenres = count($genres) > 0 ? $genres : ['DRAMA', 'FANTASY', 'COMEDY', 'ACTION', 'SLICE OF LIFE', 'ROMANCE', 'SUPERHERO', 'SCI-FI', 'THRILLER', 'SUPERNATURAL', 'MYSTERY'];
@@ -43,7 +43,7 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         @foreach($displayGenres as $genre)
             @php $genreUpper = strtoupper($genre); @endphp
-            <button wire:click="setCategory('{{ $genreUpper }}')" 
+            <button wire:click="setCategory('{{ $genreUpper }}')"
                 class="pb-3 text-[15px] font-bold uppercase tracking-wide transition-colors whitespace-nowrap relative {{ $activeCategory === $genreUpper ? 'text-black' : 'text-gray-400 hover:text-black' }}">
                 {{ $genreUpper }}
                 @if($activeCategory === $genreUpper)
@@ -57,7 +57,7 @@ new #[Layout('layouts.frontend')] class extends Component {
         <h2 class="text-[13px] font-normal text-gray-500">
             <span class="text-black text-[16px] font-bold">{{ $totalSeries }}</span> series
         </h2>
-        
+
         <div class="flex space-x-3 text-[12px] font-medium text-gray-400">
             <button wire:click="setSort('popularity')" class="transition-colors {{ $sortBy === 'popularity' ? 'text-black font-bold' : 'hover:text-black' }}">by Popularity</button>
             <span>|</span>
@@ -69,10 +69,10 @@ new #[Layout('layouts.frontend')] class extends Component {
 
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-10">
         @forelse($comics as $comic)
-            <a href="#" class="group block">
+            <a href="{{ route('comics.show', $comic->id) }}" class="group block">
                 <div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden mb-3 bg-gray-100 border border-gray-100">
                     <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}" alt="{{ $comic->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    
+
                     @if($loop->index % 5 === 0)
                         <div class="absolute top-1.5 left-1.5 bg-[#00dc64] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[3px] uppercase tracking-wide">New Series</div>
                     @elseif($loop->index % 3 === 0)
