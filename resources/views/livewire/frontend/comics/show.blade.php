@@ -169,7 +169,7 @@ new #[Layout('layouts.frontend')] class extends Component {
             @endif
 
             @if ($firstChapter)
-                <a href="{{ route('chapters.show', $firstChapter->id) }}" wire:navigate
+                <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $firstChapter->id]) }}" wire:navigate
                     class="block w-full text-center bg-[#1b1b1b] hover:bg-black text-white font-bold py-3.5 rounded-full text-[15px] transition shadow-lg">
                     Eps. pertama &gt;
                 </a>

@@ -17,7 +17,6 @@ new #[Layout('layouts.reader')] class extends Component {
 
         $nextChapter = $this->comic->chapters()->where('status', 'approved')->where('chapter_number', '>', $this->chapter->chapter_number)->orderBy('chapter_number', 'asc')->first();
 
-        // FAKTA: Mengambil 4 episode sebelum dan 4 sesudah untuk Carousel Navigasi
         $adjacentChapters = $this->comic
             ->chapters()
             ->where('status', 'approved')
