@@ -53,13 +53,13 @@
                             </span>
 
                             <div class="flex items-center space-x-2">
-                                <a href="{{ route('author.episodes.index', $comic->id) }}" wire:navigate
+                                <a href="{{ route('author.episodes.index', $comic->slug) }}" wire:navigate
                                     class="text-gray-600 hover:text-brand-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 px-3 py-1.5 rounded-md text-sm font-medium transition">
                                     Daftar Episode
                                 </a>
 
                                 @if ($comic->status !== 'approved')
-                                    <a href="{{ route('author.comics.edit', $comic->id) }}" wire:navigate
+                                    <a href="{{ route('author.comics.edit', $comic->slug) }}" wire:navigate
                                         class="text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-md text-sm font-medium transition">
                                         Revisi
                                     </a>
@@ -68,7 +68,7 @@
                                 @if (!in_array($comic->status, ['approved', 'rejected']))
                                     <button
                                         @click="$dispatch('open-delete-modal', {
-                                            id: {{ $comic->id }},
+                                            id: {{ $comic->slug }},
                                             eventName: 'trigger-delete-comic',
                                             title: 'Hapus Serial: {{ addslashes($comic->title) }}?',
                                             message: 'Menghapus serial ini akan menghapus SELURUH EPISODE di dalamnya secara permanen. Anda yakin?'

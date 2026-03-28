@@ -46,7 +46,7 @@ new #[Layout('layouts.app')] class extends Component {
         $comic = Comic::create([
             'author_id' => Auth::id(),
             'title' => $this->title,
-            'slug' => Str::slug($this->title . '-' . uniqid()),
+            'slug' => Str::slug($this->title),
             'synopsis' => $this->synopsis,
             'square_thumbnail' => $this->square_thumbnail->store('comics/square', 'public'),
             'vertical_thumbnail' => $this->vertical_thumbnail->store('comics/vertical', 'public'),
@@ -62,7 +62,7 @@ new #[Layout('layouts.app')] class extends Component {
         Notification::send($admins, new SubmissionNotification('Serial', $comic->title));
 
         session()->flash('success', 'Serial berhasil dibuat! Silakan unggah episode perdana Anda.');
-        $this->redirectRoute('author.episodes.create', ['comic' => $comic->id], navigate: true);
+        $this->redirectRoute('author.episodes.create', ['comic' => $comic->slug], navigate: true);
     }
 }; ?>
 

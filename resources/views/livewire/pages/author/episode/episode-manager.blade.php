@@ -51,7 +51,7 @@ new #[Layout('layouts.app')] class extends Component {
     <x-common.page-breadcrumb pageTitle="Daftar Episode: {{ $comic->title }}" />
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div class="flex justify-end items-center mb-6">
-            <a href="{{ route('author.episodes.create', $comic->id) }}" wire:navigate
+            <a href="{{ route('author.episodes.create', $comic->slug) }}" wire:navigate
                 class="bg-brand-500 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-brand-600">
                 + Tambah Episode Baru
             </a>
@@ -95,13 +95,13 @@ new #[Layout('layouts.app')] class extends Component {
                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
                                 @if (!in_array($chapter->status, ['approved', 'rejected']))
-                                    <a href="{{ route('author.episodes.edit', $chapter->id) }}" wire:navigate
+                                    <a href="{{ route('author.episodes.edit', $chapter->chapter_number) }}" wire:navigate
                                         class="text-blue-600 hover:text-blue-700 font-medium bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded inline-block">
                                         Revisi
                                     </a>
                                     <button
                                         @click="$dispatch('open-delete-modal', {
-                                            id: {{ $chapter->id }},
+                                            id: {{ $chapter->chapter_number }},
                                             eventName: 'trigger-delete-episode',
                                             title: 'Hapus Episode {{ $chapter->chapter_number }}?',
                                             message: 'Hapus permanen episode ini beserta semua panel gambarnya?'

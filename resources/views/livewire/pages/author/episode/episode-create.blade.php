@@ -127,18 +127,18 @@ new #[Layout('layouts.app')] class extends Component {
                         $path = 'panels/' . uniqid() . '.jpg';
                         Storage::disk('public')->put($path, (string) $slice->toJpeg(85));
 
-                        Panel::create(['chapter_id' => $chapter->id, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
+                        Panel::create(['chapter_id' => $chapter->chapter_number, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
                     }
                 } else {
                     $path = $file->store('panels', 'public');
-                    Panel::create(['chapter_id' => $chapter->id, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
+                    Panel::create(['chapter_id' => $chapter->chapter_number, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
                 }
             }
         });
 
         $admins = User::role('admin')->get();
         Notification::send($admins, new SubmissionNotification('Episode', $this->ep_title));
-        
+
         session()->flash('success', 'Episode berhasil ditambahkan dan menunggu peninjauan!');
         $this->redirectRoute('comics.index', navigate: true);
     }

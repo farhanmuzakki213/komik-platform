@@ -70,7 +70,7 @@
                                         <ul class="space-y-3">
                                             @foreach ($seriesResults as $comic)
                                                 <li>
-                                                    <a href="{{ route('comics.show', $comic->id) }}" class="flex items-center space-x-3 group">
+                                                    <a href="{{ route('comics.show', $comic->slug) }}" class="flex items-center space-x-3 group">
                                                         <img src="{{ asset('storage/' . $comic->square_thumbnail) }}"
                                                             class="w-12 h-12 rounded border border-gray-200 object-cover">
                                                         <div>

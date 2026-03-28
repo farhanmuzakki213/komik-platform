@@ -52,7 +52,7 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4">
             @foreach ($trendingComics as $index => $comic)
-                <a href="{{ route('comics.show', $comic->id) }}" class="group relative block">
+                <a href="{{ route('comics.show', $comic->slug) }}" class="group relative block">
                     <div class="relative aspect-[10/16] rounded-lg overflow-hidden bg-gray-100">
                         <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -111,7 +111,7 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-x-2 sm:gap-x-4 gap-y-6 sm:gap-y-8">
             @foreach ($categoryComics as $comic)
-                <a href="{{ route('comics.show', $comic->id) }}" class="group block">
+                <a href="{{ route('comics.show', $comic->slug) }}" class="group block">
                     <div class="relative aspect-[10/16] rounded-lg overflow-hidden bg-gray-100 mb-2">
                         <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -146,7 +146,7 @@ new #[Layout('layouts.frontend')] class extends Component {
     <section>
         <div class="flex justify-between items-end mb-4">
             <h2 class="text-xl font-bold text-black">Daily</h2>
-            <a href="{{ route('comics.show', $comic->id) }}"
+            <a href="{{ route('comics.show', $comic->slug) }}"
                 class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg
                     class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -174,7 +174,7 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-x-2 sm:gap-x-4 gap-y-6 sm:gap-y-8">
             @foreach ($dailyComics as $comic)
-                <a href="{{ route('comics.show', $comic->id) }}" class="group block">
+                <a href="{{ route('comics.show', $comic->slug) }}" class="group block">
                     <div class="relative aspect-[10/16] rounded-lg overflow-hidden mb-2 bg-gray-100">
                         <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">

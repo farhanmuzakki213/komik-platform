@@ -40,7 +40,7 @@ new #[Layout('layouts.frontend')] class extends Component {
 
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-12">
         @forelse($comics as $index => $comic)
-            <a href="{{ route('comics.show', $comic->id) }}" class="group block relative">
+            <a href="{{ route('comics.show', $comic->slug) }}" class="group block relative">
 
                 <div class="relative w-full aspect-[3/4] rounded-lg overflow-visible mb-3 bg-gray-100 border border-gray-100">
                     <img src="{{ asset('storage/' . $comic->vertical_thumbnail) }}" alt="{{ $comic->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg">

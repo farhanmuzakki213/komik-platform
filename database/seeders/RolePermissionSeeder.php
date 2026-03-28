@@ -45,3 +45,4 @@ class RolePermissionSeeder extends Seeder
         $adminUser->assignRole('admin');
     }
 }
+

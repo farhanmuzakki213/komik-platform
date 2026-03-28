@@ -24,7 +24,13 @@ new #[Layout('layouts.reader')] class extends Component {
             ->orderBy('chapter_number', 'asc')
             ->get();
 
-        return compact('panels', 'prevChapter', 'nextChapter', 'adjacentChapters');
+        $trendingComics = Comic::with('author', 'genres')
+            ->where('status', 'approved')
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+
+        return compact('panels', 'prevChapter', 'nextChapter', 'adjacentChapters', 'trendingComics');
     }
 }; ?>
 
@@ -63,7 +69,7 @@ new #[Layout('layouts.reader')] class extends Component {
 
                 <div class="hidden sm:block w-[1px] h-4 bg-gray-600"></div>
 
-                <a href="{{ route('comics.show', $comic->id) }}" wire:navigate
+                <a href="{{ route('comics.show', $comic->slug) }}" wire:navigate
                     class="hover:text-gray-300 flex-shrink-0 flex items-center group">
                     <svg class="w-5 h-5 sm:hidden mr-1 text-gray-400 group-hover:text-white transition" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +86,7 @@ new #[Layout('layouts.reader')] class extends Component {
             <div
                 class="flex items-center space-x-2 sm:space-x-4 bg-[#2b2b2b] rounded-full px-1.5 sm:px-2 py-1 flex-shrink-0">
                 @if ($prevChapter)
-                    <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $prevChapter->id]) }}"
+                    <a href="{{ route('comics.read', ['comic' => $comic->slug, 'chapter' => $prevChapter->chapter_number]) }}"
                         wire:navigate class="p-1 hover:bg-gray-600 rounded-full transition"><svg
                             class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
@@ -97,7 +103,7 @@ new #[Layout('layouts.reader')] class extends Component {
                 <span class="text-[12px] sm:text-[13px] font-bold px-1">#{{ $chapter->chapter_number }}</span>
 
                 @if ($nextChapter)
-                    <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $nextChapter->id]) }}"
+                    <a href="{{ route('comics.read', ['comic' => $comic->slug, 'chapter' => $nextChapter->chapter_number]) }}"
                         wire:navigate class="p-1 hover:bg-gray-600 rounded-full transition"><svg
                             class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
@@ -145,7 +151,7 @@ new #[Layout('layouts.reader')] class extends Component {
         <div class="max-w-[1000px] mx-auto px-4 flex items-center justify-center space-x-4">
 
             @if ($prevChapter)
-                <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $prevChapter->id]) }}"
+                <a href="{{ route('comics.read', ['comic' => $comic->slug, 'chapter' => $prevChapter->chapter_number]) }}"
                     wire:navigate class="text-gray-400 hover:text-gray-600 transition"><svg class="w-8 h-8"
                         fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
@@ -159,15 +165,15 @@ new #[Layout('layouts.reader')] class extends Component {
 
             <div class="flex overflow-x-auto custom-scrollbar space-x-3 px-2 pb-2">
                 @foreach ($adjacentChapters as $adj)
-                    <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $adj->id]) }}" wire:navigate
+                    <a href="{{ route('comics.read', ['comic' => $comic->slug, 'chapter' => $adj->chapter_number]) }}" wire:navigate
                         class="flex-shrink-0 w-[85px] group">
                         <div
-                            class="w-full aspect-[4/3] overflow-hidden border-2 transition-all {{ $adj->id === $chapter->id ? 'border-[#00dc64]' : 'border-transparent group-hover:border-gray-300' }}">
+                            class="w-full aspect-[4/3] overflow-hidden border-2 transition-all {{ $adj->chapter_number === $chapter->chapter_number ? 'border-[#00dc64]' : 'border-transparent group-hover:border-gray-300' }}">
                             <img src="{{ asset('storage/' . $adj->thumbnail) }}"
                                 class="w-full h-full object-cover opacity-90 group-hover:opacity-100">
                         </div>
                         <p
-                            class="text-[12px] text-center mt-1 truncate transition-colors {{ $adj->id === $chapter->id ? 'text-[#00dc64] font-bold' : 'text-gray-500 group-hover:text-black font-medium' }}">
+                            class="text-[12px] text-center mt-1 truncate transition-colors {{ $adj->chapter_number === $chapter->chapter_number ? 'text-[#00dc64] font-bold' : 'text-gray-500 group-hover:text-black font-medium' }}">
                             Ep. {{ $adj->chapter_number }}
                         </p>
                     </a>
@@ -175,7 +181,7 @@ new #[Layout('layouts.reader')] class extends Component {
             </div>
 
             @if ($nextChapter)
-                <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $nextChapter->id]) }}"
+                <a href="{{ route('comics.read', ['comic' => $comic->slug, 'chapter' => $nextChapter->chapter_number]) }}"
                     wire:navigate class="text-gray-400 hover:text-gray-600 transition"><svg class="w-8 h-8"
                         fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
@@ -211,77 +217,39 @@ new #[Layout('layouts.reader')] class extends Component {
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <h3 class="text-[16px] font-bold text-black mb-4">COMMENTS <span
-                            class="text-gray-400 font-normal">405</span></h3>
-
-                    <div class="border border-gray-200 rounded-lg p-3 mb-6 bg-white">
-                        <textarea rows="2" placeholder="Leave a comment" class="w-full border-none focus:ring-0 text-sm resize-none"></textarea>
-                        <div class="flex justify-between items-center mt-2 border-t border-gray-100 pt-2">
-                            <label class="flex items-center text-xs text-gray-400 cursor-pointer">
-                                <input type="checkbox" class="mr-2 rounded text-black focus:ring-black"> Spoiler
-                            </label>
-                            <button class="text-gray-400 hover:text-[#00dc64]"><svg class="w-5 h-5"
-                                    fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
-                                    </path>
-                                </svg></button>
-                        </div>
-                    </div>
-
-                    <div class="flex space-x-4 border-b border-gray-200 text-[12px] font-bold mb-6">
-                        <button class="pb-2 border-b-2 border-black text-black">TOP</button>
-                        <button class="pb-2 text-gray-400 hover:text-black">NEWEST</button>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="border-b border-gray-100 pb-4">
-                            <div class="flex justify-between items-center mb-1">
-                                <p class="text-[12px] text-gray-600">Elizabeth Corrigan</p>
-                                <button class="text-gray-300 hover:text-gray-500">⋮</button>
-                            </div>
-                            <p class="text-[10px] text-gray-400 mb-2">Jan 18, 2026</p>
-                            <span
-                                class="inline-block border border-[#00dc64] text-[#00dc64] text-[9px] font-bold px-1 rounded-sm mb-2">TOP</span>
-                            <p class="text-[14px] text-gray-900 mb-3">I now ship Crazed Layla and the shovel as endgame
-                            </p>
-
-                            <div class="flex justify-between items-center">
-                                <button
-                                    class="text-[12px] font-bold text-gray-500 border border-gray-200 px-3 py-1 rounded hover:bg-gray-50">Replies
-                                    9</button>
-                                <div class="flex items-center space-x-2">
-                                    <button
-                                        class="text-[12px] text-gray-500 font-bold flex items-center bg-gray-100 px-2 py-1 rounded hover:bg-gray-200">👍
-                                        5396</button>
-                                    <button
-                                        class="text-[12px] text-gray-500 font-bold flex items-center bg-gray-100 px-2 py-1 rounded hover:bg-gray-200">👎
-                                        12</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <livewire:frontend.comics.comment-section :chapter="$chapter" />
             </div>
 
             <div class="w-full md:w-[30%]">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-[16px] font-bold text-black">Trending & Popular</h3>
-                    <span class="text-gray-400 text-lg">&gt;</span>
+
+                <div class="flex justify-between items-center mb-2 pb-3 border-b border-gray-200 cursor-pointer group">
+                    <h3 class="text-[18px] font-bold text-black group-hover:text-gray-700 transition-colors flex items-center gap-1">
+                        Trending & Popular
+                        <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                    </h3>
                 </div>
 
-                <div class="space-y-4">
-                    <a href="#" class="flex items-center space-x-3 group">
-                        <img src="{{ asset('storage/' . $comic->square_thumbnail) }}"
-                            class="w-12 h-12 rounded object-cover border border-gray-200">
-                        <div>
-                            <p class="text-[10px] text-gray-400">{{ $comic->genres->first()->name ?? 'Fantasy' }}</p>
-                            <p class="text-[13px] font-bold text-black group-hover:text-[#00dc64] line-clamp-1"><span
-                                    class="mr-1">1</span> {{ $comic->title }}</p>
-                            <p class="text-[11px] text-gray-500 mt-0.5">{{ strtoupper($comic->author->name) }}</p>
-                        </div>
-                    </a>
+                <div class="flex flex-col">
+                    @foreach($trendingComics as $index => $trendComic)
+                        <a href="{{ route('comics.show', $trendComic->slug) }}" wire:navigate class="flex items-center gap-3.5 py-3 border-b border-gray-100 last:border-0 group">
+
+                            <div class="w-[74px] h-[74px] flex-shrink-0 overflow-hidden rounded-[4px] border border-gray-200">
+                                <img src="{{ asset('storage/' . $trendComic->square_thumbnail) }}"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            </div>
+
+                            <div class="flex flex-col justify-center flex-1 min-w-0">
+                                <p class="text-[12px] text-gray-400 font-medium mb-1 truncate">{{ $trendComic->genres->first()->name ?? 'NA' }}</p>
+
+                                <div class="flex items-center gap-2.5 mb-1">
+                                    <span class="text-[22px] font-black text-black leading-none">{{ $index + 1 }}</span>
+                                    <h4 class="text-[15px] font-bold text-black group-hover:text-[#00dc64] truncate leading-tight">{{ $trendComic->title }}</h4>
+                                </div>
+
+                                <p class="text-[13px] text-gray-600 truncate">{{ $trendComic->author->name }}</p>
+                            </div>
+                        </a>
+                    @endforeach
                 </div>
             </div>
 

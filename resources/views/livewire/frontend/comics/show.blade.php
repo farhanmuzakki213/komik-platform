@@ -78,20 +78,20 @@ new #[Layout('layouts.frontend')] class extends Component {
 
             <div class="border-t border-black" x-data="{ readChapters: JSON.parse(localStorage.getItem('readChapters') || '[]') }">
                 @forelse($chapters as $chapter)
-                    <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $chapter->id]) }}"
+                    <a href="{{ route('comics.read', ['comic' => $comic->slug, 'chapter' => $chapter->chapter_number]) }}"
                         wire:navigate
-                        @click="if(!readChapters.includes({{ $chapter->id }})) { readChapters.push({{ $chapter->id }}); localStorage.setItem('readChapters', JSON.stringify(readChapters)); }"
+                        @click="if(!readChapters.includes({{ $chapter->chapter_number }})) { readChapters.push({{ $chapter->chapter_number }}); localStorage.setItem('readChapters', JSON.stringify(readChapters)); }"
                         class="flex items-center justify-between py-3 border-b border-gray-100 transition group"
-                        :class="readChapters.includes({{ $chapter->id }}) ? 'bg-white hover:bg-gray-50' : 'hover:bg-gray-50'">
+                        :class="readChapters.includes({{ $chapter->chapter_number }}) ? 'bg-white hover:bg-gray-50' : 'hover:bg-gray-50'">
 
                         <div class="flex items-center space-x-4">
                             <img src="{{ asset('storage/' . $chapter->thumbnail) }}"
                                 class="w-[80px] h-[80px] object-cover rounded border border-gray-200 transition"
-                                :class="readChapters.includes({{ $chapter->id }}) ? 'opacity-60' : 'opacity-100'">
+                                :class="readChapters.includes({{ $chapter->chapter_number }}) ? 'opacity-60' : 'opacity-100'">
 
                             <div>
                                 <h4 class="text-[13px] font-bold transition line-clamp-1"
-                                    :class="readChapters.includes({{ $chapter->id }}) ? 'text-gray-400' :
+                                    :class="readChapters.includes({{ $chapter->chapter_number }}) ? 'text-gray-400' :
                                         'text-gray-900 group-hover:text-[#00dc64]'">
                                     {{ $chapter->title }}
                                     @if ($loop->first && $chapters->currentPage() == 1)
@@ -114,7 +114,7 @@ new #[Layout('layouts.frontend')] class extends Component {
                                 {{ number_format(rand(1000, 15000), 0, ',', '.') }}
                             </span>
                             <span class="w-8 text-right font-bold transition"
-                                :class="readChapters.includes({{ $chapter->id }}) ? 'text-gray-300' : 'text-gray-500'">
+                                :class="readChapters.includes({{ $chapter->chapter_number }}) ? 'text-gray-300' : 'text-gray-500'">
                                 #{{ $chapter->chapter_number }}
                             </span>
                         </div>
@@ -169,7 +169,7 @@ new #[Layout('layouts.frontend')] class extends Component {
             @endif
 
             @if ($firstChapter)
-                <a href="{{ route('comics.read', ['comic' => $comic->id, 'chapter' => $firstChapter->id]) }}" wire:navigate
+                <a href="{{ route('comics.read', ['comic' => $comic->slug, 'chapter' => $firstChapter->chapter_number]) }}" wire:navigate
                     class="block w-full text-center bg-[#1b1b1b] hover:bg-black text-white font-bold py-3.5 rounded-full text-[15px] transition shadow-lg">
                     Eps. pertama &gt;
                 </a>
