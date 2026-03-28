@@ -51,4 +51,15 @@ class Comic extends Model
     {
         return $this->hasMany(Chapter::class);
     }
+
+    // Relasi Polymorphic
+    public function likes() {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    // Mengecek apakah user saat ini sudah menyukai konten ini
+    public function isLikedBy($user) {
+        if (!$user) return false;
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
 }

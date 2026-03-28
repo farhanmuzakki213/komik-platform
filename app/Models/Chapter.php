@@ -35,4 +35,15 @@ class Chapter extends Model
     {
         return $this->hasMany(Panel::class)->orderBy('order_index', 'asc');
     }
+
+    // Relasi Polymorphic
+    public function likes() {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    // Mengecek apakah user saat ini sudah menyukai konten ini
+    public function isLikedBy($user) {
+        if (!$user) return false;
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
 }

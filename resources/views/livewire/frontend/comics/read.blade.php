@@ -2,12 +2,45 @@
 
 use App\Models\Comic;
 use App\Models\Chapter;
+use Illuminate\Support\Number;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
 new #[Layout('layouts.reader')] class extends Component {
     public Comic $comic;
     public Chapter $chapter;
+
+    public bool $isLiked = false;
+
+    public function mount()
+    {
+        $sessionKey = 'viewed_chapter_' . $this->chapter->id;
+        if (!session()->has($sessionKey)) {
+            $this->chapter->increment('views_count');
+            session()->put($sessionKey, true);
+        }
+
+        if (auth()->check()) {
+            $this->isLiked = $this->chapter->isLikedBy(auth()->user());
+        }
+    }
+
+    public function toggleLike()
+    {
+        if (!auth()->check()) return $this->redirect(route('login'), navigate: true);
+
+        $user = auth()->user();
+
+        if ($this->isLiked) {
+            $this->chapter->likes()->where('user_id', $user->id)->delete();
+            $this->chapter->decrement('likes_count');
+            $this->isLiked = false;
+        } else {
+            $this->chapter->likes()->create(['user_id' => $user->id]);
+            $this->chapter->increment('likes_count');
+            $this->isLiked = true;
+        }
+    }
 
     public function with(): array
     {
@@ -206,12 +239,14 @@ new #[Layout('layouts.reader')] class extends Component {
                         <h3 class="text-[18px] font-bold text-black">{{ strtoupper($comic->author->name) }}</h3>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <button
-                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-[13px] font-bold px-4 py-2 rounded-full transition flex items-center">
-                            ♡ 7,903
+                        <button wire:click="toggleLike"
+                                class="text-[13px] font-bold px-4 py-2 rounded-full transition flex items-center border"
+                                :class="$wire.isLiked ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-gray-100 hover:bg-gray-200 text-gray-800 border-transparent'">
+                            <span class="mr-1.5 text-lg leading-none" x-text="$wire.isLiked ? '♥' : '♡'"></span>
+                            {{ Number::abbreviate($chapter->likes_count, maxPrecision: 1) }}
                         </button>
-                        <button
-                            class="bg-black hover:bg-gray-800 text-white text-[13px] font-bold px-5 py-2 rounded-full transition flex items-center">
+
+                        <button class="bg-black hover:bg-gray-800 text-white text-[13px] font-bold px-5 py-2 rounded-full transition flex items-center">
                             + Subscribe
                         </button>
                     </div>

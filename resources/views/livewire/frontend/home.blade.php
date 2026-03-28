@@ -1,10 +1,12 @@
 <?php
 
 use App\Models\Comic;
+use App\Models\ComicRank;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
 new #[Layout('layouts.frontend')] class extends Component {
+    public string $activeTrendingTab = 'Trending';
     public string $activeDay = 'SAT';
     public string $activeCategory = 'Drama';
 
@@ -12,15 +14,45 @@ new #[Layout('layouts.frontend')] class extends Component {
     {
         $baseQuery = Comic::with('author', 'genres')->where('status', 'approved');
 
+        // 1. Logika Switch Sorting (Trending = Views, Popular = Likes)
+        if ($this->activeTrendingTab === 'Popular') {
+            $top30Comics = (clone $baseQuery)->orderByDesc('likes_count')->take(30)->get();
+        } else {
+            $top30Comics = (clone $baseQuery)->orderByDesc('views_count')->take(30)->get();
+        }
+
+        // 2. Optimasi N+1 Query: Tarik data peringkat kemarin sekaligus
+        $top30Ids = $top30Comics->pluck('id');
+        $latestRecordDate = ComicRank::max('recorded_at');
+
+        $yesterdayRanks = ComicRank::whereIn('comic_id', $top30Ids)->where('recorded_at', $latestRecordDate)->pluck('rank', 'comic_id');
+
+        // 3. Kalkulasi Pergerakan Peringkat (Rank Change)
+        $top30Comics->map(function ($comic, $index) use ($yesterdayRanks) {
+            $currentRank = $index + 1;
+
+            if ($yesterdayRanks->has($comic->id)) {
+                $yesterdayRank = $yesterdayRanks[$comic->id];
+                $comic->rank_change = $yesterdayRank - $currentRank;
+            } else {
+                $comic->rank_change = 'NEW';
+            }
+            return $comic;
+        });
+
         return [
-            'trendingComics' => (clone $baseQuery)->take(5)->get(),
+            'trendingComics' => $top30Comics->take(5), // Tetap ambil 5 teratas untuk ditampilkan
             'categoryComics' => (clone $baseQuery)->latest()->take(6)->get(),
             'newReleases' => (clone $baseQuery)->inRandomOrder()->take(5)->get(),
             'dailyComics' => (clone $baseQuery)->take(12)->get(),
-            'indieComics' => (clone $baseQuery)->latest()->take(6)->get(),
         ];
     }
 
+    // Fungsi Pengubah State
+    public function setTrendingTab($tab)
+    {
+        $this->activeTrendingTab = $tab;
+    }
     public function setDay($day)
     {
         $this->activeDay = $day;
@@ -37,13 +69,20 @@ new #[Layout('layouts.frontend')] class extends Component {
         <div class="flex justify-between items-end mb-4">
             <div class="flex items-center space-x-4">
                 <h2 class="text-xl font-bold text-black">Trending & Popular Series</h2>
+
                 <div class="flex bg-gray-100 rounded-full p-0.5">
-                    <button class="text-[11px] font-bold px-4 py-1.5 bg-black text-white rounded-full">Trending</button>
-                    <button
-                        class="text-[11px] font-bold px-4 py-1.5 text-gray-500 hover:text-black rounded-full">Popular</button>
+                    <button wire:click="setTrendingTab('Trending')"
+                        class="text-[11px] font-bold px-4 py-1.5 rounded-full transition-colors {{ $activeTrendingTab === 'Trending' ? 'bg-black text-white' : 'text-gray-500 hover:text-black' }}">
+                        Trending
+                    </button>
+                    <button wire:click="setTrendingTab('Popular')"
+                        class="text-[11px] font-bold px-4 py-1.5 rounded-full transition-colors {{ $activeTrendingTab === 'Popular' ? 'bg-black text-white' : 'text-gray-500 hover:text-black' }}">
+                        Popular
+                    </button>
                 </div>
+
             </div>
-            <a href="{{ route('rankings') }}"
+            <a href="{{ route('rankings') }}" wire:navigate
                 class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg
                     class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -62,14 +101,33 @@ new #[Layout('layouts.frontend')] class extends Component {
                         </div>
                     </div>
                     <div class="mt-2 pl-6">
-                        <div class="flex items-center space-x-1 text-[10px] text-[#00dc64] font-bold mb-0.5">
-                            <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                                    clip-rule="evenodd"></path>
-                            </svg>
-                            <span>{{ rand(1, 20) }}</span>
+                        <div class="h-[15px] mb-0.5 flex items-center">
+                            @if ($comic->rank_change === 'NEW')
+                                <span
+                                    class="text-[10px] text-orange-500 font-bold bg-orange-100 px-1 rounded-sm leading-none pt-0.5 pb-0.5">NEW</span>
+                            @elseif($comic->rank_change > 0)
+                                <div class="flex items-center space-x-1 text-[10px] text-[#00dc64] font-bold">
+                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>{{ $comic->rank_change }}</span>
+                                </div>
+                            @elseif($comic->rank_change < 0)
+                                <div class="flex items-center space-x-1 text-[10px] text-red-500 font-bold">
+                                    <svg class="w-2.5 h-2.5 transform rotate-180" fill="currentColor"
+                                        viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>{{ abs($comic->rank_change) }}</span>
+                                </div>
+                            @else
+                            @endif
                         </div>
+
                         <h3 class="text-[14px] font-bold text-black line-clamp-1 group-hover:text-[#00dc64]">
                             {{ $comic->title }}</h3>
                         <p class="text-[12px] text-gray-500 mt-0.5">{{ $comic->genres->first()->name ?? 'Fantasy' }}</p>
@@ -118,7 +176,9 @@ new #[Layout('layouts.frontend')] class extends Component {
                     </div>
                     <h3 class="text-[13px] font-bold text-black line-clamp-1 group-hover:text-[#00dc64]">
                         {{ $comic->title }}</h3>
-                    <p class="text-[11px] text-gray-400 mt-0.5">{{ rand(10, 99) }}M Views</p>
+                    <p class="text-[11px] text-gray-400 mt-0.5">
+                        {{ \Illuminate\Support\Number::abbreviate($comic->views_count ?? 0, maxPrecision: 1) }} Views
+                    </p>
                 </a>
             @endforeach
         </div>
@@ -186,7 +246,8 @@ new #[Layout('layouts.frontend')] class extends Component {
                     <p class="text-[11px] text-gray-500">{{ $comic->genres->first()->name ?? 'Romance' }}</p>
                     <h3 class="text-[13px] font-bold text-black group-hover:text-[#00dc64] line-clamp-1">
                         {{ $comic->title }}</h3>
-                    <p class="text-[11px] text-[#00dc64] font-bold mt-0.5">♥ {{ rand(10, 999) }},000</p>
+                    <p class="text-[11px] text-[#00dc64] font-bold mt-0.5">
+                        {{ \Illuminate\Support\Number::abbreviate($comic->likes_count) }}</p>
                 </a>
             @endforeach
         </div>

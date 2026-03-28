@@ -2,6 +2,7 @@
 
 use App\Models\Comic;
 use App\Models\Chapter;
+use Illuminate\Support\Number;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -11,6 +12,21 @@ new #[Layout('layouts.frontend')] class extends Component {
 
     public Comic $comic;
 
+    public bool $isLiked = false;
+
+    public function mount()
+    {
+        $sessionKey = 'viewed_comic_' . $this->comic->id;
+        if (!session()->has($sessionKey)) {
+            $this->comic->increment('views_count');
+            session()->put($sessionKey, true);
+        }
+
+        if (auth()->check()) {
+            $this->isLiked = $this->comic->isLikedBy(auth()->user());
+        }
+    }
+
     public function with(): array
     {
         return [
@@ -18,6 +34,23 @@ new #[Layout('layouts.frontend')] class extends Component {
 
             'firstChapter' => $this->comic->chapters()->where('status', 'approved')->orderBy('chapter_number', 'asc')->first(),
         ];
+    }
+
+    public function toggleLike()
+    {
+        if (!auth()->check()) return $this->redirect(route('login'), navigate: true);
+
+        $user = auth()->user();
+
+        if ($this->isLiked) {
+            $this->comic->likes()->where('user_id', $user->id)->delete();
+            $this->comic->decrement('likes_count');
+            $this->isLiked = false;
+        } else {
+            $this->comic->likes()->create(['user_id' => $user->id]);
+            $this->comic->increment('likes_count');
+            $this->isLiked = true;
+        }
     }
 
     public function paginationView()
@@ -53,9 +86,12 @@ new #[Layout('layouts.frontend')] class extends Component {
                 </svg>
                 Share
             </button>
-            <button
-                class="bg-black hover:bg-gray-800 text-white px-5 py-2 rounded-full text-sm font-bold transition flex items-center border border-gray-700">
-                <span class="text-xl leading-none mr-2">+</span> Favorit
+
+            <button wire:click="toggleLike"
+                class="px-5 py-2 rounded-full text-sm font-bold transition flex items-center border"
+                :class="$wire.isLiked ? 'bg-[#00dc64] text-white border-[#00dc64]' : 'bg-black hover:bg-gray-800 text-white border-gray-700'">
+                <span class="text-xl leading-none mr-2" x-text="$wire.isLiked ? '♥' : '+'"></span>
+                Favorit
             </button>
         </div>
     </div>
@@ -105,13 +141,13 @@ new #[Layout('layouts.frontend')] class extends Component {
                         </div>
 
                         <div class="flex items-center space-x-6 text-[12px] font-medium">
-                            <span class="flex items-center text-gray-400">
+                            <span class="flex items-center text-gray-400" title="{{ number_format($chapter->likes_count ?? 0) }} Likes">
                                 <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
                                     </path>
                                 </svg>
-                                {{ number_format(rand(1000, 15000), 0, ',', '.') }}
+                                {{ \Illuminate\Support\Number::abbreviate($chapter->likes_count ?? 0, maxPrecision: 1) }}
                             </span>
                             <span class="w-8 text-right font-bold transition"
                                 :class="readChapters.includes({{ $chapter->chapter_number }}) ? 'text-gray-300' : 'text-gray-500'">
@@ -134,22 +170,23 @@ new #[Layout('layouts.frontend')] class extends Component {
         <div class="w-full md:w-[35%] pt-2">
 
             <div class="flex items-center space-x-4 mb-6">
-                <span class="flex items-center text-[13px] font-bold text-gray-700">
+                <span class="flex items-center text-[13px] font-bold text-gray-700" title="{{ number_format($comic->views_count) }} Views">
                     <svg class="w-4 h-4 mr-1.5 text-[#00dc64]" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                         <path fill-rule="evenodd"
                             d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
                             clip-rule="evenodd"></path>
                     </svg>
-                    {{ number_format(rand(1, 50), 1) }}JT
+                    {{ \Illuminate\Support\Number::abbreviate($comic->views_count ?? 0, maxPrecision: 1) }}
                 </span>
-                <span class="flex items-center text-[13px] font-bold text-gray-700">
+
+                <span class="flex items-center text-[13px] font-bold text-gray-700" title="{{ number_format($comic->likes_count) }} Likes">
                     <svg class="w-4 h-4 mr-1.5 text-[#00dc64]" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
                             clip-rule="evenodd"></path>
                     </svg>
-                    {{ number_format(rand(10000, 900000), 0, ',', '.') }}
+                    {{ \Illuminate\Support\Number::abbreviate($comic->likes_count ?? 0, maxPrecision: 1) }}
                 </span>
             </div>
 
