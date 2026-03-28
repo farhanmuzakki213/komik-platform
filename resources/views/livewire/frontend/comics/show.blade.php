@@ -100,16 +100,24 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         <div class="w-full md:w-[65%]">
 
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex justify-between items-center mb-4">
-                <div class="text-sm font-bold text-black text-center w-full">
-                    Baca <span class="text-[#00dc64]">10 episode</span> selanjutnya di aplikasi!<br>
-                    <span class="text-xs text-gray-500 font-medium">Download app WEBKOMIK di Google Play Store atau App
-                        Store.</span>
+            <div class="bg-[#fafafa] border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between mb-6 shadow-sm group hover:border-[#00dc64]/50 transition-colors">
+
+                <div class="text-center sm:text-left w-full sm:w-auto flex-1 mb-3 sm:mb-0">
+                    <h4 class="text-[15px] font-bold text-black leading-tight">
+                        Komik favoritmu <span class="text-[#00dc64]">belum tersedia?</span>
+                    </h4>
+                    <p class="text-[12px] text-gray-500 font-medium mt-1">
+                        Scan QR Code di samping untuk <span class="font-bold text-gray-700">Request Komik</span> langsung ke Admin!
+                    </p>
                 </div>
-                <div class="hidden sm:block">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=request komik? hub @frhnmzki_ "
-                        alt="QR" class="w-14 h-14 rounded">
+
+                <div class="flex-shrink-0">
+                    <div class="p-1.5 bg-white border border-gray-200 rounded-md shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=Request komik untuk ditambahkan ke Webkomik! (IG: @)"
+                            alt="QR Request Komik" class="w-12 h-12 rounded-sm opacity-90 group-hover:opacity-100 transition-opacity">
+                    </div>
                 </div>
+
             </div>
 
             <div class="border-t border-black" x-data="{ readChapters: JSON.parse(localStorage.getItem('readChapters') || '[]') }">
