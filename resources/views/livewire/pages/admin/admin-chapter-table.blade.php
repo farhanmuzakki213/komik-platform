@@ -23,7 +23,7 @@
                     </td>
                     <td class="px-6 py-4">{{ $chapter->created_at->diffForHumans() }}</td>
                     <td class="px-6 py-4 text-right">
-                        <button wire:click="loadChapterPreview({{ $chapter->chapter_number }})" class="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 px-4 py-2 rounded-lg font-medium transition shadow-sm">
+                        <button wire:click="loadChapterPreview({{ $chapter->id }})" class="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 px-4 py-2 rounded-lg font-medium transition shadow-sm">
                             Review Konten
                         </button>
                     </td>

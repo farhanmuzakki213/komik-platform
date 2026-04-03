@@ -24,10 +24,9 @@ new #[Layout('layouts.app')] class extends Component {
     public bool $allow_comments = true;
     public string $published_at = '';
 
-    // FAKTA: Arsitektur Unified State
-    public $temporary_uploads = []; // Menampung input file mentah
-    public $upload_pool = []; // Menampung objek file fisik
-    public array $panels = []; // Array utama yang mengatur antarmuka & urutan
+    public $temporary_uploads = [];
+    public $upload_pool = [];
+    public array $panels = [];
 
     public function updatedTemporaryUploads()
     {
@@ -37,9 +36,8 @@ new #[Layout('layouts.app')] class extends Component {
 
         foreach ($this->temporary_uploads as $file) {
             $ref = uniqid('upload_');
-            $this->upload_pool[$ref] = $file; // Simpan file ke pool
+            $this->upload_pool[$ref] = $file;
 
-            // Masukkan ke antarmuka terpadu
             $this->panels[] = [
                 'uuid' => uniqid('panel_'),
                 'type' => 'new',
@@ -48,7 +46,7 @@ new #[Layout('layouts.app')] class extends Component {
                 'name' => $file->getClientOriginalName(),
             ];
         }
-        $this->temporary_uploads = []; // Kosongkan input agar bisa tambah file lagi
+        $this->temporary_uploads = [];
     }
 
     public function removePanel($uuid)
@@ -62,7 +60,7 @@ new #[Layout('layouts.app')] class extends Component {
                 break;
             }
         }
-        $this->panels = array_values($this->panels); // Reset index array
+        $this->panels = array_values($this->panels);
     }
 
     public function reorderPanels($orderedUuids)
@@ -103,7 +101,7 @@ new #[Layout('layouts.app')] class extends Component {
             ]);
 
             $manager = new ImageManager(new Driver());
-            $globalOrderIndex = 0; // Indeks global untuk menjaga urutan di DB
+            $globalOrderIndex = 0;
 
             foreach ($this->panels as $panel) {
                 $file = $this->upload_pool[$panel['file_ref']];
@@ -116,7 +114,6 @@ new #[Layout('layouts.app')] class extends Component {
                     $height = $image->height();
                 }
 
-                // Slicing Engine
                 if ($height > 1280) {
                     $slices = ceil($height / 1280);
                     for ($i = 0; $i < $slices; $i++) {
@@ -127,11 +124,11 @@ new #[Layout('layouts.app')] class extends Component {
                         $path = 'panels/' . uniqid() . '.jpg';
                         Storage::disk('public')->put($path, (string) $slice->toJpeg(85));
 
-                        Panel::create(['chapter_id' => $chapter->chapter_number, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
+                        Panel::create(['chapter_id' => $chapter->id, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
                     }
                 } else {
                     $path = $file->store('panels', 'public');
-                    Panel::create(['chapter_id' => $chapter->chapter_number, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
+                    Panel::create(['chapter_id' => $chapter->id, 'image_path' => $path, 'order_index' => $globalOrderIndex++]);
                 }
             }
         });
