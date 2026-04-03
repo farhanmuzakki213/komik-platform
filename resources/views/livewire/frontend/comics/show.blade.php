@@ -16,12 +16,6 @@ new #[Layout('layouts.frontend')] class extends Component {
 
     public function mount()
     {
-        $sessionKey = 'viewed_comic_' . $this->comic->id;
-        if (!session()->has($sessionKey)) {
-            $this->comic->increment('views_count');
-            session()->put($sessionKey, true);
-        }
-
         if (auth()->check()) {
             $this->isLiked = $this->comic->isLikedBy(auth()->user());
         }
@@ -44,11 +38,9 @@ new #[Layout('layouts.frontend')] class extends Component {
 
         if ($this->isLiked) {
             $this->comic->likes()->where('user_id', $user->id)->delete();
-            $this->comic->decrement('likes_count');
             $this->isLiked = false;
         } else {
             $this->comic->likes()->create(['user_id' => $user->id]);
-            $this->comic->increment('likes_count');
             $this->isLiked = true;
         }
     }

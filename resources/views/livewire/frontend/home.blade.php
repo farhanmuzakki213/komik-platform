@@ -206,7 +206,7 @@ new #[Layout('layouts.frontend')] class extends Component {
     <section>
         <div class="flex justify-between items-end mb-4">
             <h2 class="text-xl font-bold text-black">Daily</h2>
-            <a href="{{ route('comics.show', $comic->slug) }}"
+            <a href="{{ route('originals') }}"
                 class="text-xs text-gray-400 hover:text-black font-semibold flex items-center">View all <svg
                     class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

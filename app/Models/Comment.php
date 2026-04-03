@@ -15,4 +15,12 @@ class Comment extends Model
     public function replies() {
         return $this->hasMany(Comment::class, 'parent_id')->latest();
     }
+
+    /**
+     * Relasi Polymorphic untuk Interaksi Like/Dislike
+     */
+    public function reactions()
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
 }

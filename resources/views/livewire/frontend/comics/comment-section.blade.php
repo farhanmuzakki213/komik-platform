@@ -12,9 +12,8 @@ new class extends Component {
     public string $body = '';
     public bool $isSpoiler = false;
 
-    // State Form Balasan (Array terisolasi per ID Komentar Parent)
+    // State Form Balasan
     public array $replyBodies = [];
-    // FAKTA: Tambahan state array untuk melacak status spoiler pada setiap form balasan
     public array $replySpoilers = [];
 
     // State Sorting & Limit
@@ -23,7 +22,23 @@ new class extends Component {
 
     public function with(): array
     {
-        $query = Comment::with(['user', 'replies.user'])
+        $userId = Auth::id();
+
+        // FAKTA: Eager Loading canggih. Hanya muat reaksi milik user yang sedang Login
+        $query = Comment::with([
+            'user',
+            'replies.user',
+            'reactions' => function ($q) use ($userId) {
+                if ($userId) {
+                    $q->where('user_id', $userId);
+                }
+            },
+            'replies.reactions' => function ($q) use ($userId) {
+                if ($userId) {
+                    $q->where('user_id', $userId);
+                }
+            },
+        ])
             ->where('chapter_id', $this->chapter->id)
             ->whereNull('parent_id');
 
@@ -34,7 +49,7 @@ new class extends Component {
         }
 
         $comments = $query->take($this->limit)->get();
-        $totalComments = Comment::where('chapter_id', $this->chapter->id)->count();
+        $totalComments = Comment::where('chapter_id', $this->chapter->id)->whereNull('parent_id')->count();
 
         return compact('comments', 'totalComments');
     }
@@ -44,7 +59,6 @@ new class extends Component {
         if (!Auth::check()) {
             return $this->redirect(route('login'), navigate: true);
         }
-
         $this->validate(['body' => 'required|string|max:1000']);
 
         Comment::create([
@@ -65,7 +79,6 @@ new class extends Component {
         }
 
         $replyBody = $this->replyBodies[$parentId] ?? '';
-        // FAKTA: Ambil status spoiler spesifik untuk form balasan ini (Default: false)
         $isReplySpoiler = $this->replySpoilers[$parentId] ?? false;
 
         $this->validate(['replyBodies.' . $parentId => 'required|string|max:1000'], ['replyBodies.' . $parentId . '.required' => 'Balasan tidak boleh kosong.']);
@@ -75,12 +88,67 @@ new class extends Component {
             'chapter_id' => $this->chapter->id,
             'parent_id' => $parentId,
             'body' => $replyBody,
-            'is_spoiler' => $isReplySpoiler, // Terapkan status spoiler
+            'is_spoiler' => $isReplySpoiler,
         ]);
 
-        // Bersihkan input form balasan dan reset spoilernya
         $this->replyBodies[$parentId] = '';
         $this->replySpoilers[$parentId] = false;
+    }
+
+    // FAKTA: Logika Cerdas Toggle Like (Batal, Tambah, atau Pindah dari Dislike)
+    public function like($commentId)
+    {
+        if (!Auth::check()) {
+            return $this->redirect(route('login'), navigate: true);
+        }
+
+        $comment = Comment::findOrFail($commentId);
+        $reaction = $comment->reactions()->where('user_id', Auth::id())->first();
+
+        if ($reaction) {
+            if ($reaction->is_dislike) {
+                // User sebelumnya Dislike, sekarang pindah ke Like
+                $reaction->update(['is_dislike' => false]);
+                $comment->decrement('dislikes_count');
+                $comment->increment('likes_count');
+            } else {
+                // User klik Like 2x, artinya Batal Like
+                $reaction->delete();
+                $comment->decrement('likes_count');
+            }
+        } else {
+            // User belum pernah interaksi, tambah Like baru
+            $comment->reactions()->create(['user_id' => Auth::id(), 'is_dislike' => false]);
+            $comment->increment('likes_count');
+        }
+    }
+
+    // FAKTA: Logika Cerdas Toggle Dislike
+    public function dislike($commentId)
+    {
+        if (!Auth::check()) {
+            return $this->redirect(route('login'), navigate: true);
+        }
+
+        $comment = Comment::findOrFail($commentId);
+        $reaction = $comment->reactions()->where('user_id', Auth::id())->first();
+
+        if ($reaction) {
+            if (!$reaction->is_dislike) {
+                // User sebelumnya Like, sekarang pindah ke Dislike
+                $reaction->update(['is_dislike' => true]);
+                $comment->decrement('likes_count');
+                $comment->increment('dislikes_count');
+            } else {
+                // User klik Dislike 2x, artinya Batal Dislike
+                $reaction->delete();
+                $comment->decrement('dislikes_count');
+            }
+        } else {
+            // User belum pernah interaksi, tambah Dislike baru
+            $comment->reactions()->create(['user_id' => Auth::id(), 'is_dislike' => true]);
+            $comment->increment('dislikes_count');
+        }
     }
 
     public function setSort($sort)
@@ -92,14 +160,6 @@ new class extends Component {
     {
         $this->limit += 10;
     }
-    public function like($commentId)
-    {
-        Comment::where('id', $commentId)->increment('likes_count');
-    }
-    public function dislike($commentId)
-    {
-        Comment::where('id', $commentId)->increment('dislikes_count');
-    }
 }; ?>
 
 <div class="mb-6">
@@ -110,7 +170,6 @@ new class extends Component {
         @auth
             <textarea wire:model="body" rows="2" placeholder="Ketik komentar disini..."
                 class="w-full border-none focus:ring-0 text-[14px] text-gray-800 placeholder-gray-400 resize-none bg-transparent p-0 mb-2"></textarea>
-
             <div class="flex justify-between items-center mt-2 pt-2">
                 <div class="flex items-center space-x-4">
                     <label class="flex items-center cursor-pointer group">
@@ -151,8 +210,13 @@ new class extends Component {
 
     <div class="space-y-0">
         @forelse($comments as $comment)
-            <div class="border-b border-gray-100 py-5 group" x-data="{ showReplies: false }">
+            @php
+                $userReaction = $comment->reactions->first();
+                $isLiked = $userReaction && !$userReaction->is_dislike;
+                $isDisliked = $userReaction && $userReaction->is_dislike;
+            @endphp
 
+            <div class="border-b border-gray-100 py-5 group" x-data="{ showReplies: false }">
                 <div class="flex justify-between items-start mb-2">
                     <div>
                         <div class="flex items-center space-x-2">
@@ -207,22 +271,23 @@ new class extends Component {
                             </svg>
                         </button>
                     </div>
+
                     <div class="flex items-center space-x-1.5">
                         <button wire:click="like({{ $comment->id }})"
-                            class="flex items-center space-x-1.5 bg-gray-50 border border-gray-200 px-2 py-1 rounded hover:bg-gray-100 transition text-gray-500">
-                            <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
+                            class="flex items-center space-x-1.5 px-2 py-1 rounded transition border {{ $isLiked ? 'bg-[#00dc64]/10 border-[#00dc64]/30 text-[#00dc64]' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100' }}">
+                            <svg class="w-4 h-4 mb-0.5 {{ $isLiked ? 'fill-current' : 'fill-none' }}"
+                                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 01-2 2h-2.5">
+                                    d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5">
                                 </path>
                             </svg>
                             <span
                                 class="text-[11px] font-bold">{{ $comment->likes_count > 0 ? $comment->likes_count : '' }}</span>
                         </button>
                         <button wire:click="dislike({{ $comment->id }})"
-                            class="flex items-center space-x-1.5 bg-gray-50 border border-gray-200 px-2 py-1 rounded hover:bg-gray-100 transition text-gray-500">
-                            <svg class="w-4 h-4 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
+                            class="flex items-center space-x-1.5 px-2 py-1 rounded transition border {{ $isDisliked ? 'bg-red-50 border-red-200 text-red-500' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100' }}">
+                            <svg class="w-4 h-4 mt-0.5 {{ $isDisliked ? 'fill-current' : 'fill-none' }}"
+                                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5">
                                 </path>
@@ -235,6 +300,12 @@ new class extends Component {
 
                 <div x-show="showReplies" x-collapse class="mt-4 space-y-4 pl-4 border-l-2 border-gray-100 ml-2">
                     @foreach ($comment->replies as $reply)
+                        @php
+                            $replyReaction = $reply->reactions->first();
+                            $isReplyLiked = $replyReaction && !$replyReaction->is_dislike;
+                            $isReplyDisliked = $replyReaction && $replyReaction->is_dislike;
+                        @endphp
+
                         <div class="group/reply">
                             <div class="flex justify-between items-start mb-1">
                                 <div>
@@ -269,9 +340,9 @@ new class extends Component {
 
                             <div class="flex justify-end items-center space-x-1.5">
                                 <button wire:click="like({{ $reply->id }})"
-                                    class="flex items-center space-x-1 bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50 transition text-gray-400">
-                                    <svg class="w-3 h-3 mb-0.5" fill="none" stroke="currentColor"
-                                        stroke-width="2" viewBox="0 0 24 24">
+                                    class="flex items-center space-x-1 px-2 py-1 rounded transition border {{ $isReplyLiked ? 'bg-[#00dc64]/10 border-[#00dc64]/30 text-[#00dc64]' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50' }}">
+                                    <svg class="w-3 h-3 mb-0.5 {{ $isReplyLiked ? 'fill-current' : 'fill-none' }}"
+                                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 01-2 2h-2.5">
                                         </path>
@@ -281,9 +352,9 @@ new class extends Component {
                                     @endif
                                 </button>
                                 <button wire:click="dislike({{ $reply->id }})"
-                                    class="flex items-center space-x-1 bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50 transition text-gray-400">
-                                    <svg class="w-3 h-3 mt-0.5" fill="none" stroke="currentColor"
-                                        stroke-width="2" viewBox="0 0 24 24">
+                                    class="flex items-center space-x-1 px-2 py-1 rounded transition border {{ $isReplyDisliked ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50' }}">
+                                    <svg class="w-3 h-3 mt-0.5 {{ $isReplyDisliked ? 'fill-current' : 'fill-none' }}"
+                                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5">
                                         </path>
@@ -310,14 +381,12 @@ new class extends Component {
                                 </div>
                                 <button wire:click="postReply({{ $comment->id }})"
                                     class="bg-black text-white px-5 py-2 rounded text-[12px] font-bold hover:bg-gray-800 transition whitespace-nowrap shadow-sm transition-opacity duration-200 mt-0.5"
-                                    :class="focused ? 'opacity-100' : 'opacity-0 group-hover/form:opacity-100'">
-                                    Kirim
-                                </button>
+                                    :class="focused ? 'opacity-100' : 'opacity-0 group-hover/form:opacity-100'">Kirim</button>
                             </div>
 
                             <div class="flex items-center transition-opacity duration-200"
                                 :class="focused ? 'opacity-100' : 'opacity-0 group-hover/form:opacity-100'">
-                                <label class="flex items-center cursor-pointer group/spoiler">
+                                <label class="flex items-center cursor-pointer group/spoiler mt-1">
                                     <span
                                         class="text-[10px] font-bold text-gray-400 mr-2 group-hover/spoiler:text-gray-600 transition">Spoiler</span>
                                     <div class="relative inline-block w-6 h-[14px] transition-colors duration-200 ease-in-out rounded-full"
@@ -331,13 +400,9 @@ new class extends Component {
                                     </div>
                                 </label>
                             </div>
+
                         </div>
                     @else
-                        <div class="pl-2 pt-2">
-                            <p class="text-[12px] text-gray-500 bg-gray-50 p-2 rounded">Please <a
-                                    href="{{ route('login') }}" class="text-[#00dc64] font-bold hover:underline">Log
-                                    In</a> to reply.</p>
-                        </div>
                     @endauth
                 </div>
 
@@ -352,9 +417,8 @@ new class extends Component {
         @if ($totalComments > $limit)
             <div class="pt-4">
                 <button wire:click="loadMore"
-                    class="w-full py-3 text-[13px] font-bold text-gray-500 hover:text-black bg-white hover:bg-gray-50 border border-gray-200 rounded-full transition">
-                    Lebih banyak komentar ∨
-                </button>
+                    class="w-full py-3 text-[13px] font-bold text-gray-500 hover:text-black bg-white hover:bg-gray-50 border border-gray-200 rounded-full transition">Lebih
+                    banyak komentar ∨</button>
             </div>
         @endif
     </div>

@@ -62,7 +62,7 @@ new #[Layout('layouts.app')] class extends Component {
         Notification::send($admins, new SubmissionNotification('Serial', $comic->title));
 
         session()->flash('success', 'Serial berhasil dibuat! Silakan unggah episode perdana Anda.');
-        $this->redirectRoute('author.episodes.create', ['comic' => $comic->slug], navigate: true);
+        $this->redirectRoute('author.episodes.create', ['comic' => $comic->id], navigate: true);
     }
 }; ?>
 

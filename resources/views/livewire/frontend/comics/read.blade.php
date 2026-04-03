@@ -17,6 +17,8 @@ new #[Layout('layouts.reader')] class extends Component {
         $sessionKey = 'viewed_chapter_' . $this->chapter->id;
         if (!session()->has($sessionKey)) {
             $this->chapter->increment('views_count');
+            $this->comic->increment('views_count');
+
             session()->put($sessionKey, true);
         }
 
@@ -34,10 +36,14 @@ new #[Layout('layouts.reader')] class extends Component {
         if ($this->isLiked) {
             $this->chapter->likes()->where('user_id', $user->id)->delete();
             $this->chapter->decrement('likes_count');
+            $this->comic->decrement('likes_count');
+
             $this->isLiked = false;
         } else {
             $this->chapter->likes()->create(['user_id' => $user->id]);
             $this->chapter->increment('likes_count');
+            $this->comic->increment('likes_count');
+
             $this->isLiked = true;
         }
     }

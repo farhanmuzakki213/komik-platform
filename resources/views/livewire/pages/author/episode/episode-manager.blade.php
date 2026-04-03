@@ -51,7 +51,7 @@ new #[Layout('layouts.app')] class extends Component {
     <x-common.page-breadcrumb pageTitle="Daftar Episode: {{ $comic->title }}" />
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div class="flex justify-end items-center mb-6">
-            <a href="{{ route('author.episodes.create', $comic->slug) }}" wire:navigate
+            <a href="{{ route('author.episodes.create', $comic->id) }}" wire:navigate
                 class="bg-brand-500 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-brand-600">
                 + Tambah Episode Baru
             </a>
